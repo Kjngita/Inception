@@ -5,23 +5,54 @@ services:
       dockerfile: Dockerfile
     container_name: mariadb
     restart: unless-stopped
-    environment:
-      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
-      - MYSQL_DATABASE=${MYSQL_DATABASE}
-      - MYSQL_USER=${MYSQL_USER}
-      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+    env_file:
+      - .env
     volumes:
       - mariadb_data:/var/lib/mysql
     ports:
       - "3306:3306"
     networks:
       - inception_network
+    secrets:
+      - mysql_root_pw
+      - mysql_pw
+
+  wordpress:
+    build:
+      context: ./requirements/wordpress
+      dockerfile: Dockerfile
+    container_name: wordpress
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - wordpress_files:/var/www/html
+    networks:
+      - inception_network
+    depends_on:
+      - mariadb
+    secrets:
+      - mysql_pw
+      - wp_admin_pw
+      - wp_user_pw
 
 volumes:
   mariadb_data:
     name: mariadb_data
+  wordpress_files:
+    name: wordpress_files
 
 networks:
   inception_network:
     name: inception_network
     driver: bridge
+
+secrets:
+  mysql_root_pw:
+    file: ../secrets/mysql_root_pw.txt
+  mysql_pw:
+    file: ../secrets/mysql_pw.txt
+  wp_admin_pw:
+    file: ../secrets/wp_admin_pw.txt
+  wp_user_pw:
+    file: ../secrets/wp_user_pw.txt

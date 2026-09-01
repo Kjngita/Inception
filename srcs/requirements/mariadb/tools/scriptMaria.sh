@@ -1,5 +1,9 @@
 #!/bin/sh
 
+# Read root password from secret
+MYSQL_ROOT_PASSWORD=$(cat /run/secrets/mysql_root_pw)
+MYSQL_PASSWORD=$(cat /run/secrets/mysql_pw)
+
 # Initialize database if it doesn't exist
 if [ ! -d "/var/lib/mysql/mysql" ]; then
 	echo "Initializing MariaDB data directory..."
@@ -11,12 +15,12 @@ if [ ! -d "/var/lib/mysql/mysql" ]; then
 	mariadbd --user=mysql --datadir=/var/lib/mysql --skip-networking &
 	DB_PID=$!
 
-	# Wait for MariaDB using mysqladmin ping
-	echo "Waiting for MariaDB to be ready..."
-	while ! mariadb-admin ping --silent 2>/dev/null; do
-		# Once MariaDB is ready, ping succeeds (returns 0), and the loop exits
-		:
+	# Wait for MariaDB socket file to appear
+	echo "Waiting for MariaDB socket..."
+	while [ ! -S /run/mysqld/mysqld.sock ]; do
+		sleep 1
 	done
+	echo "MariaDB socket is ready!"
 
 	echo "Setting up database and users..."
     # Root password
@@ -38,4 +42,4 @@ fi
 echo "Starting MariaDB..."
 # Replace current shell process with the final MariaDB
 # With exec, MariaDB becomes PID 1 in the container & receives signals directly
-exec mariadbd --user=mysql --datadir=/var/lib/mysql
+exec mariadbd --user=mysql --datadir=/var/lib/mysql --skip-networking=0 --port=3306 --bind-address=0.0.0.0
