@@ -35,6 +35,21 @@ services:
       - mysql_pw
       - wp_admin_pw
       - wp_user_pw
+  
+  nginx:
+    container_name: nginx
+    build:
+      context: ./requirements/nginx
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      - wordpress
+    volumes:
+      - wordpress_files:/var/www/html:ro  # Read-only access to WordPress files
+    ports:
+      - "8443:443"  # Host port 8443 → Container port 443
+    networks:
+      - inception_network
 
 volumes:
   mariadb_data:
