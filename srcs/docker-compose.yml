@@ -53,9 +53,18 @@ services:
 
 volumes:
   mariadb_data:
-    name: mariadb_data
+    driver: local
+    driver_opts:
+      type: none
+      device: /home/gita/data/mariadb
+      o: bind
+
   wordpress_files:
-    name: wordpress_files
+    driver: local
+    driver_opts:
+      type: none
+      device: /home/gita/data/wordpress
+      o: bind
 
 networks:
   inception_network:
