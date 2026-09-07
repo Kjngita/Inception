@@ -47,7 +47,7 @@ services:
     volumes:
       - wordpress_files:/var/www/html:ro  # Read-only access to WordPress files
     ports:
-      - "8443:443"  # Host port 8443 → Container port 443
+      - "443:443"
     networks:
       - inception_network
 
