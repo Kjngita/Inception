@@ -48,6 +48,7 @@ services:
       - wordpress_files:/var/www/html:ro  # Read-only access to WordPress files
     ports:
       - "443:443"
+      - "80:80"   # HTTP connection which should be rejected
     networks:
       - inception_network
 
