@@ -13,7 +13,7 @@ up:
 down:
 	$(COMPOSE) down
 
-re: down up
+rebuild: down up
 
 logs:
 	$(COMPOSE) logs -f
@@ -25,9 +25,11 @@ clean:
 	$(COMPOSE) down -v
 
 fclean: clean
-	@docker system prune -af
-	@docker volume prune -f
+	#remove project images
+	@docker rmi -f mariadb wordpress nginx 2>/dev/null || true
+	#remove build cache
+	@docker builder prune -f
 
 re: fclean up
 
-.PHONY: all up down re logs ps clean fclean re
+.PHONY: all up down rebuild logs ps clean fclean re
