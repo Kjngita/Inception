@@ -10,8 +10,6 @@ services:
       - .env
     volumes:
       - mariadb_data:/var/lib/mysql
-    ports:
-      - "3306:3306"
     networks:
       - inception_network
     secrets:
@@ -49,7 +47,7 @@ services:
       - wordpress
     volumes:
       - wordpress_files:/var/www/html:ro  # Read-only access to WordPress files
-    ports:
+    ports: #Left = host machine : Right = Container on VM
       - "443:443"
       - "80:80"   # HTTP connection which should be rejected
     networks:
@@ -57,6 +55,7 @@ services:
 
 volumes:
   mariadb_data:
+    name: mariadb_data
     driver: local
     driver_opts:
       type: none
@@ -64,6 +63,7 @@ volumes:
       o: bind
 
   wordpress_files:
+    name: wordpress_files
     driver: local
     driver_opts:
       type: none
