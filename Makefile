@@ -15,12 +15,6 @@ down:
 
 rebuild: down up
 
-logs:
-	$(COMPOSE) logs -f
-
-ps:
-	$(COMPOSE) ps
-
 clean:
 	$(COMPOSE) down -v
 
@@ -32,4 +26,4 @@ fclean: clean
 
 re: fclean up
 
-.PHONY: all up down rebuild logs ps clean fclean re
+.PHONY: all up down rebuild clean fclean re

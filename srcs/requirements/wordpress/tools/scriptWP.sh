@@ -37,15 +37,14 @@ if [ ! -f index.php ]; then
 fi
 
 # Create wp-config.php
-if [ ! -f wp-config.php ]; then
-	echo "Creating wp-config.php..."
-	$WP config create \
-		--dbname="${MYSQL_DATABASE}" \
-		--dbuser="${MYSQL_USER}" \
-		--dbpass="$DB_PASSWORD" \
-		--dbhost="mariadb:3306" \
-		--allow-root
-fi
+echo "Creating/updating wp-config.php..."
+$WP config create \
+    --dbname="${MYSQL_DATABASE}" \
+    --dbuser="${MYSQL_USER}" \
+    --dbpass="$DB_PASSWORD" \
+    --dbhost="mariadb:3306" \
+    --force \
+    --allow-root
 
 # Wait until database is ready
 until wp db check --allow-root >/dev/null 2>&1
