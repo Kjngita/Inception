@@ -47,7 +47,7 @@ services:
       - wordpress
     volumes:
       - wordpress_files:/var/www/html:ro  # Read-only access to WordPress files
-    ports: #Left = host machine : Right = Container on VM
+    ports: #Left = Host machine (VM in this project) : Right = Container
       - "443:443"
       - "80:80"   # HTTP connection which should be rejected
     networks:
