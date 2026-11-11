@@ -1,5 +1,3 @@
-*This project has been created as part of the 42 curriculum by gita.*
-
 # Inception
 
 ## Description
@@ -29,15 +27,78 @@ inception/
         └── wordpress/
 ```
 
-### Main design choices
+### Technical choices
 
 - **One service per container** — clear separation of concerns.
 - **Custom Dockerfiles only** — no images pulled from Docker Hub besides Alpine.
-- **Alpine 3.23** — small and fast.
-- **Docker secrets** — no passwords in Dockerfiles, compose, or `.env`.
-- **Named volumes + bind driver** — data stored at `/home/gita/data/`, managed by Docker.
-- **NGINX is the only entrypoint** — MariaDB and WordPress are internal-only.
+- **Alpine 3.23** for all images — minimal and fast, with explicit version tags (no `latest`).
+- **Docker secrets over env vars** — all credentials live in `secrets/`, never in Dockerfiles, compose, or `.env`.
+- **Named volumes with bind driver** — data persists in `/home/gita/data/`, managed by Docker.
+- **NGINX is the only entrypoint** — only NGINX exposes ports: 443 (HTTPS) and 80 (rejected with 403). MariaDB and WordPress are internal-only.
+- **Self-signed TLS certificate** — generated at build time via OpenSSL, supporting TLSv1.2 and TLSv1.3.
 
+
+## Instructions
+
+### Prerequisites
+
+- Linux VM with Docker, Docker Compose, and `make`
+- Domain resolution — add to `/etc/hosts`:
+
+```
+127.0.0.1 gita.42.fr
+```
+(The project was created on a school computer, hence a virtual machine was needed to bypass the lack of root privileges)
+
+### Secrets
+
+From the repository root, create the `secrets` directory:
+```bash
+mkdir -p secrets
+```
+Create the necessary password files:
+```bash
+touch secrets/mysql_root_pw.txt
+touch secrets/mysql_pw.txt
+touch secrets/wp_admin_pw.txt
+touch secrets/wp_user_pw.txt
+```
+Then put in those files whatever your heart desires for the passwords.
+
+### Run
+
+From the repository root:
+
+```bash
+make
+```
+
+Then open in the VM's browser:
+
+```
+https://gita.42.fr
+```
+
+Accept the self-signed certificate warning. Use the website as a visitor.
+
+**Admin panel**:
+```
+https://gita.42.fr/wp-admin
+```
+Wordpress Admin and User accounts can be found and edit in `srcs/.env`, with passwords in `secrets` directory.
+
+### Make targets
+
+| Target | Description |
+|--------|-------------|
+| `make` / `up` | Build and start everything |
+| `down` | Stop and remove containers |
+| `rebuild` | Restart the containers |
+| `clean` | Remove containers, networks, volumes |
+| `fclean` | `clean` + remove images and build cache |
+| `re` | Full rebuild (`fclean` + `up`) |
+
+## Resources
 ### Virtual Machines vs Docker
 
 | Aspect | VM | Docker |
@@ -72,58 +133,6 @@ inception/
 | Location | `/var/lib/docker/volumes/` | Anywhere on host |
 | In Inception | Named volume with `driver_opts` bound to `/home/gita/data/` | Hybrid approach |
 
-## Instructions
-
-### Prerequisites
-
-- Linux VM with Docker, Docker Compose, and `make`
-- Domain resolution — add to `/etc/hosts`:
-
-```
-127.0.0.1 gita.42.fr
-```
-
-### Secrets
-
-From the repository root:
-```bash
-mkdir -p secrets
-touch secrets/mysql_root_pw.txt
-touch secrets/mysql_pw.txt
-touch secrets/wp_admin_pw.txt
-touch secrets/wp_user_pw.txt
-```
-And put in those files whatever your heart desires for the passwords.
-
-### Run
-
-From the repository root:
-
-```bash
-make
-```
-
-Then open in the VM's browser:
-
-```
-https://gita.42.fr
-```
-
-Accept the self-signed certificate warning. Admin panel: `https://gita.42.fr/wp-admin`.
-
-### Make targets
-
-| Target | Description |
-|--------|-------------|
-| `make` / `up` | Build and start everything |
-| `down` | Stop and remove containers |
-| `rebuild` | Restart the containers |
-| `clean` | Remove containers, networks, volumes |
-| `fclean` | `clean` + remove images and build cache |
-| `re` | Full rebuild (`fclean` + `up`) |
-
-## Resources
-
 ### References
 
 - [Docker Docs](https://docs.docker.com/)
@@ -147,12 +156,3 @@ AI was used for:
 - **Documentation** — structuring this README, USER_DOC and DEV_DOC.
 
 All AI output was reviewed, tested, and adapted to the Inception subject constraints.
-
-## Technical choices
-
-- **Alpine 3.23** for all images — minimal and fast.
-- **No `latest` tags** — explicit versions only.
-- **Secrets over env vars** — all credentials in `secrets/`.
-- **Named volumes with bind driver** — data persists in `/home/gita/data/`.
-- **Only NGINX exposes ports** — 443 (HTTPS) and 80 (rejected with 403).
-- **Self-signed TLS cert** generated at build time via OpenSSL (TLSv1.2/TLSv1.3).
